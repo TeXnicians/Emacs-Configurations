@@ -42,7 +42,7 @@
 
 ;fonts
 
-;(set-default-font "Courier New-14") 
+(set-default-font "Menlo") 
 ;(set-face-attribute
 ;    'default nil :font
 ;    "-outline-Courier New-normal-normal-normal-mono-12-*-*-*-c-*-iso8859-1")
@@ -89,6 +89,11 @@
                     :inherit 'tabbar-default
                     :box '(:line-width 2 :color "gray70")
                     )
+
+;; themes
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(add-to-list 'load-path "~/.emacs.d/themes")
+(load-theme 'tomorrow-night-eighties t)
 
 ;(global-set-key (kbd "C-s-<down>") 'shrink-window)
 ;(global-set-key (kbd "C-s-<up>") 'enlarge-window)
@@ -268,6 +273,7 @@
    ("align" "\\begin{align}\\label{eqn:?}\n\n\\end{align}" nil)
    ("alignat" "\\begin{alignat}\\label{eqn:?}\n\n\\end{alignat}" nil)
    ("aligned" "\\left\\{\n\\begin{aligned}\n\n\\end{aligned}\n\\right." nil)
+   ("numsol" "\\begin{numsol}\n\\exercise{?}\n\\end{numsol}" nil)
   )
 )   ;; define several frequently-used environments
 
@@ -284,6 +290,7 @@
   ("equ" "Insert equation env" "" cdlatex-environment ("equation") t nil)
   ("mtli" "Insert multline env" "" cdlatex-environment ("multline") t nil)
   ("ali" "Insert align env" "" cdlatex-environment ("align") t nil)
+  ("nms" "Insert align env" "" cdlatex-environment ("numsol") t nil)
   ("alat" "Insert alignat env"   "" cdlatex-environment ("alignat") t nil)
   ("aligned" "Insert aligned env" "" cdlatex-environment ("aligned") t t)
   ("dfr"         "Insert \\dfrac{}{}"

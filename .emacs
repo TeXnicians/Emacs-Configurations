@@ -43,6 +43,8 @@
 ;fonts
 
 (set-default-font "Menlo") 
+(set-fontset-font "fontset-default"
+  'unicode '("STHeiti" . "unicode-bmp"))
 ;(set-face-attribute
 ;    'default nil :font
 ;    "-outline-Courier New-normal-normal-normal-mono-12-*-*-*-c-*-iso8859-1")
@@ -130,8 +132,8 @@
 (setq frame-title-format '((:eval (frame-title-string))))
 
 ;coding system
-(set-language-environment "Chinese-GBK")
-(set-keyboard-coding-system 'chinese-iso-8bit)
+;(set-language-environment "Chinese-GBK")
+;(set-keyboard-coding-system 'chinese-iso-8bit)
 
 ;smart tab
 (setq-default TeX-newline-function 'newline-and-indent)
@@ -142,6 +144,9 @@
 (show-paren-mode 1)
 (setq show-paren-style 'parenthesis)
 (setq show-paren-delay 0)
+
+;open file in new buffer instead of new window
+(setq ns-pop-up-frames nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;; LaTeX settings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -200,7 +205,7 @@
 
 (add-hook 'LaTeX-mode-hook (lambda ()
   (add-to-list 'TeX-command-list
-    '("latexmk" "latexmk -pdf -e -f %s" TeX-run-TeX nil t
+    '("latexmk" "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b" TeX-run-TeX nil t
       :help "Run latexmk on file")
     )
   (setq TeX-command-default "latexmk")

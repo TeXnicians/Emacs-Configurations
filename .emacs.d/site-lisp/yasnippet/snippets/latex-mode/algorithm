@@ -1,0 +1,12 @@
+# contributor: wd
+# name: \begin{algorithm} ... \end{algorithm}
+# key: algorithm
+# --
+
+\begin{algorithm}
+    \caption{${1:caption}}
+    \label{alg:${2:label}}
+    \begin{algorithmic}
+       $0
+    \end{algorithmic}
+\end{algorithm}

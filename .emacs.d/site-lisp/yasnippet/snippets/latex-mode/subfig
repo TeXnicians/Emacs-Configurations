@@ -1,0 +1,18 @@
+# contributor: wd
+# name: \begin{figure} \subfloat... \end{figure}
+# key: subfig
+# --
+
+\begin{figure}[!htbp]
+\begin{center}
+\parbox[b]{\textwidth}{\footnotesize\centering
+\subcaptionbox{${1:subcaption1}\label{fig:${2:filename1}}}
+{\includegraphics[width=.45\textwidth]{./figures/$2}}
+\hspace{.1\textwidth}
+\subcaptionbox{${3:subcaption2}\label{fig:${4:filename1}}}
+{\includegraphics[width=.45\textwidth]{./figures/$4}}
+\caption{${5:caption}}
+\label{fig:${6:label}}
+}
+\end{center}
+\end{figure}

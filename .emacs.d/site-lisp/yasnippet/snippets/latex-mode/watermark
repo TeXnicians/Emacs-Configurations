@@ -1,0 +1,11 @@
+# contributor: wd
+# name: draftwatermark
+# key: watermark
+# --
+
+\usepackage{draftwatermark}
+\def\latexcv{L\kern-.27em \lower-.5ex\hbox{\fontsize{.67em}{.2em}\selectfont A}\kern-.1em\TeX\kern-.1em C\kern-.1em\lower.5ex\hbox{\fontsize{.87em}{.2em}\selectfont V}}
+\SetWatermarkText{\latexcv}
+\SetWatermarkAngle{45}
+\SetWatermarkScale{1} % watermark
+\SetWatermarkLightness{0.95}

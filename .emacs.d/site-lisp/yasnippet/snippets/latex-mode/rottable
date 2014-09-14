@@ -1,0 +1,24 @@
+# contributor: wd
+# name: \begin{sidewaystable} ... \end{sidewaystable}
+# key: rottable
+# --
+
+\begin{sidewaystable}[!htbp]
+\begin{threeparttable}\small
+\begin{center}
+\caption{${1:caption}}
+\label{tab:${2:label}}
+  \begin{tabular*}{\textwidth}
+  {@{\extracolsep{\fill}}${3:alignment}}
+  \toprule
+  \tnote{\scriptsize 1}
+  $0
+  \bottomrule
+  \end{tabular*}
+  \begin{tablenotes}
+    \footnotesize
+    \item[\scriptsize 1] 
+  \end{tablenotes}
+\end{center}
+\end{threeparttable}
+\end{sidewaystable}

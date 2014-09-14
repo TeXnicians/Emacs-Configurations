@@ -1,0 +1,11 @@
+# contributor: wd
+# name: cventry
+# key: cventry
+# --
+
+\cventry{${1:location}}{${2:title}}{${3:time}}
+{${4:subtitle}}{
+\begin{itemize}%
+\item ${5:contents}
+\end{itemize}
+}

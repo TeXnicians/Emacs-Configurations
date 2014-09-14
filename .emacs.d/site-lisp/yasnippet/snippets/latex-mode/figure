@@ -1,0 +1,14 @@
+# contributor: wd
+# name: \begin{figure} ... \end{figure}
+# key: figure
+# --
+
+\begin{figure}[!ht]
+\begin{center}
+\parbox[b]{\textwidth}{\footnotesize\centering
+\includegraphics{./figures/${1:filename}.pdf}
+\caption{${2:caption}}
+\label{fig:$1}
+}
+\end{center}
+\end{figure}

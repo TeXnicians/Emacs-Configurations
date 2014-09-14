@@ -1,0 +1,19 @@
+# contributor: wd
+# name: \begin{table} ... \end{table}
+# key: table
+# --
+
+\begin{table}[!ht]
+\begin{center}
+\parbox[b]{\textwidth}{\small
+\caption{${1:caption}}
+\label{tab:${2:label}}
+    \begin{tabular*}{\textwidth}
+    {@{\extracolsep{\fill}}${3:alignment}}
+    \toprule
+    $0
+    \bottomrule
+    \end{tabular*}
+}
+\end{center}
+\end{table}

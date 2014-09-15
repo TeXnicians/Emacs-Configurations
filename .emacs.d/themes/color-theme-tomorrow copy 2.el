@@ -144,7 +144,7 @@ names to which it refers are bound."
 
      ;; For Brian Carper's extended clojure syntax table
      (clojure-keyword ((,class (:foreground ,yellow))))
-     (clojure-parens ((,class (:foreground ,foreground))))
+     (clojure-parens ((,class (:foreground ,foreground))))\{ddd\}
      (clojure-braces ((,class (:foreground ,green))))
      (clojure-brackets ((,class (:foreground ,yellow))))
      (clojure-double-quote ((,class (:foreground ,aqua :background nil))))
@@ -191,7 +191,7 @@ names to which it refers are bound."
      (hl-line ((,class (:background ,current-line))))
      (border ((,class (:background ,current-line))))
      (border-glyph ((,class (nil))))
-     (highlight ((,class (:background ,selection))))
+     (highlight ((,class (:background ,green))))
      (link ((,class (:foreground ,blue))))
      (link-visited ((,class (:foreground ,purple))))
      (gui-element ((,class (:background ,current-line :foreground ,foreground))))

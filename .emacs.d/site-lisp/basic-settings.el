@@ -56,10 +56,10 @@
 ;tabbar
 (require 'tabbar)
 (tabbar-mode)
-(global-set-key [M-up] 'tabbar-backward-group)
-(global-set-key [M-down] 'tabbar-forward-group)
-(global-set-key [M-left] 'tabbar-backward-tab)
-(global-set-key [M-right] 'tabbar-forward-tab)
+(global-set-key [M-s-up] 'tabbar-backward-group)
+(global-set-key [M-s-down] 'tabbar-forward-group)
+(global-set-key [M-s-left] 'tabbar-backward-tab)
+(global-set-key [M-s-right] 'tabbar-forward-tab)
 
 ;;;; tabbar appearance
 ;; themes, fonts, back-&foreground,size
@@ -178,6 +178,61 @@
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/smartparens")
 
-;; parens auto-complete
-; (electric-pair-mode 1)
-; (require 'smartparens-config)
+; Smooth scrolling
+(setq my-wheel-scroll-lines 2) ; or whatever you prefer
+
+(defun safe-scroll-up () "Scroll up but don't try at bottom" (interactive)
+(if (not (pos-visible-in-window-p (point-max)))
+(scroll-up my-wheel-scroll-lines)))
+(defun safe-scroll-down () "Scroll down but don't try at top" (interactive)
+(if (not (pos-visible-in-window-p (point-min)))
+(scroll-down my-wheel-scroll-lines)))
+
+(global-set-key [wheel-up] 'safe-scroll-down)
+(global-set-key [wheel-down] 'safe-scroll-up)
+
+;; helm for launch buffer
+(add-to-list 'load-path "/Users/Zhaodong/.emacs.d/site-lisp/helm")
+(require 'helm-config)
+;; helm mini
+(global-set-key (kbd "C-s-p") 'helm-mini)
+(helm-mode 1)
+(setq helm-buffers-fuzzy-matching t)
+
+; go to matched paren
+(defun goto-match-paren (arg)
+  "Go to the matching  if on (){}[], similar to vi style of % "
+  (interactive "p")
+  ;; first, check for "outside of bracket" positions expected by forward-sexp, etc
+  (cond ((looking-at "[\[\(\{]") (forward-sexp))
+        ((looking-back "[\]\)\}]" 1) (backward-sexp))
+        ;; now, try to succeed from inside of a bracket
+        ((looking-at "[\]\)\}]") (forward-char) (backward-sexp))
+        ((looking-back "[\[\(\{]" 1) (backward-char) (forward-sexp))
+        (t nil)
+        )
+  )
+
+(defun dispatch-goto-matching (arg)
+  (interactive "p")
+ 
+  (if (or
+       (looking-at "[\[\(\{]")
+       (looking-at "[\]\)\}]")
+       (looking-back "[\[\(\{]" 1)
+       (looking-back "[\]\)\}]" 1))
+ 
+      (goto-match-paren arg)
+ 
+    (when (eq major-mode 'ruby-mode)
+      (goto-matching-ruby-block arg)
+      )
+ 
+    )
+  )
+
+(global-set-key "\M--" 'dispatch-goto-matching)
+
+;; cursor moving
+(global-set-key (kbd "<s-up>") 'beginning-of-buffer)
+(global-set-key (kbd "<s-down>") 'end-of-buffer)

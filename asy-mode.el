@@ -443,8 +443,8 @@ This variable must be modified only using the function 'asy-set-master-tex by M-
            (asy-compile-command
             (concat  asy-command-location asy-command
                      (if (eq asy-compilation-buffer 'never)
-                         " " " -wait ")
-                     (asy-protect-file-name buffer-base-name) " && " "open " (asy-protect-file-name (concat buffer-base-name ".pdf")))))
+                         " " " ")
+                     (asy-protect-file-name buffer-base-name) " && " "/Applications/Skim.app/Contents/SharedSupport/displayline -r 1 " (asy-protect-file-name (concat buffer-base-name ".pdf")))))
         (if (buffer-modified-p) (save-buffer))
         (message "%s" asy-compile-command)
         (asy-internal-compile asy-compile-command t t)))))
@@ -456,7 +456,7 @@ This variable must be modified only using the function 'asy-set-master-tex by M-
       (let*
           ((buffer-base-name (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
            (asy-view-command
-            (concat  "open " (asy-protect-file-name (concat buffer-base-name ".pdf")))))
+            (concat  "/Applications/Skim.app/Contents/SharedSupport/displayline -r 1 " (asy-protect-file-name (concat buffer-base-name ".pdf")))))
         (asy-internal-compile asy-view-command t t)
 )))
 

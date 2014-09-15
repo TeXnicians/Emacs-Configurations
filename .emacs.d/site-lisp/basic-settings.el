@@ -174,7 +174,7 @@
     (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 
 ;; optional key binding
-(global-set-key (kbd "C-S-l") 'copy-line)
+(global-set-key (kbd "C-s-l") 'copy-line)
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/smartparens")
 

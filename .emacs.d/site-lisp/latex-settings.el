@@ -56,7 +56,7 @@
 
 (add-hook 'LaTeX-mode-hook (lambda ()
   (add-to-list 'TeX-command-list
-    '("latexmk" "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b" TeX-run-TeX nil t
+    '("latexmk" "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b" TeX-run-TeX nil t
       :help "Run latexmk on file")
     )
   (setq TeX-command-default "latexmk")
@@ -76,7 +76,7 @@
 ;; option -b highlights the current line; option -g opens Skim in the background
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
 (setq TeX-view-program-list
-     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b")))
+     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b")))
 
 ;(setq TeX-view-program-list '(("PDF Viewer" "open -a /Applications/Skim.app %s.pdf")))
 ;(setq TeX-view-program-selection '((output-pdf "DF Viewer")(output-dvi "PDF Viewer")))
@@ -88,7 +88,7 @@
     (lambda ()
         (add-to-list 'TeX-output-view-style
             '("^pdf$" "."
-              "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b")))
+              "/Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b")))
 )
 
 

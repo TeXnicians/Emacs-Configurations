@@ -45,7 +45,7 @@
 
 ;;; Code:
 
-(require 'auto-complete)
+;(require 'auto-complete)
 
 (defgroup auto-complete+ nil
   "Auto completion plus."

@@ -96,7 +96,7 @@
 
 (eval-when-compile (require 'cl))
 
-(require 'auto-complete)
+;(require 'auto-complete)
 
 (defvar ac-l-source-user-keywords* nil
   "A list of user keywords.")

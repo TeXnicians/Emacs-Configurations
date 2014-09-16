@@ -54,7 +54,7 @@
 (require 'smartparens)
 
 (defun sp-latex-insert-spaces-inside-pair (id action context)
-  (when (eq action 'insert)
+a  (when (eq action 'insert)
     (insert "  ")
     (backward-char 1)))
 
@@ -85,6 +85,7 @@ This predicate is only tested on \"insert\" action."
                  tex-mode
                  plain-tex-mode
                  latex-mode
+                 asy-mode
                  )
   (sp-local-pair "`" "'"
                  :skip-match 'sp-latex-skip-match-apostrophe

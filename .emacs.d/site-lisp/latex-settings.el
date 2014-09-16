@@ -110,6 +110,9 @@
       reftex-save-parse-info t
       reftex-use-multiple-selection-buffers t)
 
+;auto-complete
+(require 'auto-complete-settings)
+
 ;cdlatex
 
 (setq cdlatex-math-modify-prefix [f1])
@@ -169,31 +172,6 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 
-;auto complete
-(add-to-list 'load-path "~/.emacs.d/site-lisp/auto-complete")
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/site-lisp/auto-complete/ac-dict")
-(ac-config-default)
-(global-auto-complete-mode t)
-(ac-flyspell-workaround)
-
-
-(require 'auto-complete-latex)
-;(require 'yasnippet-settings)
-
-;; parens auto-complete
-(require 'smartparens-latex)
-; ; (package-initialize)
-; (defun prelude-latex-mode-defaults ()
-;    (turn-on-auto-fill)
-;    (abbrev-mode +1)
-;    (smartparens-mode +1))
-
-; (setq prelude-latex-mode-hook 'prelude-latex-mode-defaults)
-
-(smartparens-global-mode +1)
-(show-smartparens-global-mode +1)
-(setq show-paren-style 'parenthesis)
 
 ; ;latex paren
 ; (add-hook 'LaTeX-mode-hook

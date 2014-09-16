@@ -197,7 +197,13 @@
 ;; helm mini
 (global-set-key (kbd "C-s-p") 'helm-mini)
 (helm-mode 1)
-(setq helm-buffers-fuzzy-matching t)
+(setq helm-quick-update                     t
+      helm-split-window-in-side-p           t
+      helm-buffers-fuzzy-matching           t
+      helm-move-to-line-cycle-in-source     t
+      helm-ff-search-library-in-sexp        t
+      helm-ff-file-name-history-use-recentf t)
+
 
 ; go to matched paren
 (defun goto-match-paren (arg)

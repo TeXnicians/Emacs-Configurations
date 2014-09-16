@@ -96,11 +96,25 @@ This function runs the actual AppleScript."
 		       dir))		   ; dir only if not.
 	 (script			   ; Define script variable using revealpath and text.
 	  (concat
-	   "set thePath to POSIX file \"" revealpath "\"\n"
-	   "tell application \"Finder\"\n"
-	   " set frontmost to true\n"
-	   " reveal thePath \n"
-	   "end tell\n")))		   ; let* definition part ends here.
+	   "set filePath to POSIX file \"" revealpath "\"\n"
+       "try\n"
+	   "tell application \"Finder\" to activate\n"
+       "delay 0.5\n"
+       "tell application \"System Events\" to keystroke \"t\" using command down\n"
+       "tell application \"Finder\"\n"
+       "if kind of (info for filePath) is \"folder\" then\n"
+       "set target of window 1 to filePath\n"
+       "else\n"
+       "set target of window 1 to filePath\n"
+       "set target of window 1 to container of target of window 1\n"
+       "reveal filePath\n"
+       "delay 0\n"
+       "end if\n"
+       "end tell\n"
+       "on error errStr number errorNumber\n"
+       "set msg to \"Error \" & errStr\n"
+       "do shell script \"echo \" & msg\n"
+       "end try\n")))		   ; let* definition part ends here.
     ;; (message script)			   ; Check the text output.
     (start-process "osascript-getinfo" nil "osascript" "-e" script) ; Run AppleScript.
     ))

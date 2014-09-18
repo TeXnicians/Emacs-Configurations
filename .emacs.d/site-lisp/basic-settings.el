@@ -28,6 +28,7 @@
 
 ;(load "desktop")
 ;(desktop-load-default)
+(global-auto-revert-mode t)
 ;(desktop-read)
 (desktop-save-mode 1)
 
@@ -193,52 +194,126 @@
 
 ;; helm for launch buffer
 (add-to-list 'load-path "/Users/Zhaodong/.emacs.d/site-lisp/helm")
+(require 'helm)
 (require 'helm-config)
-;; helm mini
-(global-set-key (kbd "C-s-p") 'helm-mini)
-(helm-mode 1)
-(setq helm-quick-update                     t
-      helm-split-window-in-side-p           t
-      helm-buffers-fuzzy-matching           t
-      helm-move-to-line-cycle-in-source     t
-      helm-ff-search-library-in-sexp        t
+; (require 'helm-eshell)
+; (require 'helm-files)
+; (require 'helm-grep)
+
+; ;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
+; ;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
+; ;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
+; (global-set-key (kbd "C-c h") 'helm-command-prefix)
+; (global-unset-key (kbd "C-x c"))
+
+; (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebihnd tab to do persistent action
+; (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
+; (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+; (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
+; (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
+; (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward)
+
+; (when (executable-find "curl")
+;   (setq helm-google-suggest-use-curl-p t))
+
+(setq helm-quick-update                     t ; do not display invisible candidates
+      helm-split-window-in-side-p           t ; open helm buffer inside current window, not occupy whole other window
+      helm-buffers-fuzzy-matching           t ; fuzzy matching buffer names when non--nil
+      helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
+      helm-ff-search-library-in-sexp        t ; search for library in `require' and `declare-function' sexp.
+      helm-scroll-amount                    8 ; scroll 8 lines other window using M-<next>/M-<prior>
       helm-ff-file-name-history-use-recentf t)
 
+(helm-mode 1)
+
+;; helm mini
+(define-key global-map [?\s-p] nil)
+(global-set-key (kbd "s-p") 'helm-mini)
+(global-set-key (kbd "M-x") 'helm-M-x)
 
 ; go to matched paren
-(defun goto-match-paren (arg)
+(defun goto-match-paren-dollar (arg)
   "Go to the matching  if on (){}[], similar to vi style of % "
   (interactive "p")
   ;; first, check for "outside of bracket" positions expected by forward-sexp, etc
-  (cond ((looking-at "[\[\(\{]") (forward-sexp))
-        ((looking-back "[\]\)\}]" 1) (backward-sexp))
+  (cond ((looking-at "[\[\(\{\$]") (forward-sexp))
+        ((looking-back "[\]\)\}\$]" 1) (backward-sexp))
         ;; now, try to succeed from inside of a bracket
-        ((looking-at "[\]\)\}]") (forward-char) (backward-sexp))
-        ((looking-back "[\[\(\{]" 1) (backward-char) (forward-sexp))
+        ((looking-at "[\]\)\}\$]") (forward-char) (backward-sexp))
+        ((looking-back "[\[\(\{\$]" 1) (backward-char) (forward-sexp))
         (t nil)
         )
   )
 
-(defun dispatch-goto-matching (arg)
-  (interactive "p")
- 
-  (if (or
-       (looking-at "[\[\(\{]")
-       (looking-at "[\]\)\}]")
-       (looking-back "[\[\(\{]" 1)
-       (looking-back "[\]\)\}]" 1))
- 
-      (goto-match-paren arg)
- 
-    (when (eq major-mode 'ruby-mode)
-      (goto-matching-ruby-block arg)
-      )
- 
-    )
-  )
+(defun goto-match-paren (arg)
+     "Go to the matching parenthesis if on parenthesis. Else go to the
+   opening parenthesis one level up."
+     (interactive "p")
+     (cond ((looking-at "\\s(") (forward-list 1))
+           (t
+            (backward-char 1)
+            (cond ((looking-at "\\s)")
+                   (forward-char 1) (backward-list 1))
+                  (t
+                   (while (not (looking-at "\\s("))
+                     (backward-char 1)
+                     (cond ((looking-at "\\s)")
+                            (message "->> )")
+                            (forward-char 1)
+                            (backward-list 1)
+                            (backward-char 1)))
+                     ))))))
 
-(global-set-key "\M--" 'dispatch-goto-matching)
+; (defun dispatch-goto-matching (arg)
+;   (interactive "p")
+;  
+;   (if (or
+;        (looking-at "[\[\(\{]")
+;        (looking-at "[\]\)\}]")
+;        (looking-back "[\[\(\{]" 1)
+;        (looking-back "[\]\)\}]" 1))
+;  
+;       (goto-match-paren arg)
+;  
+;     (when (eq major-mode 'ruby-mode)
+;       (goto-matching-ruby-block arg)
+;       )
+;  
+;     )
+;   )
+
+(global-set-key (kbd "<f5>") 'goto-match-paren)
+(global-set-key (kbd "<f6>") 'goto-match-paren-dollar)
 
 ;; cursor moving
 (global-set-key (kbd "<s-up>") 'beginning-of-buffer)
 (global-set-key (kbd "<s-down>") 'end-of-buffer)
+;; kill whole line
+(global-set-key (kbd "<s-backspace>") 'kill-whole-line)
+;; replace all key bindings for ‘kill-buffer’ with bindings to ‘kill-buffer-and-its-windows’
+(require 'misc-cmds)
+(substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
+
+;; redefine kill-matching-buffers
+(defun delte-matching-window (regexp &optional internal-too)
+  "Kill buffers whose name matches the specified regexp.
+The optional second argument indicates whether to kill internal buffers too."
+  (interactive "sKill buffers matching this regular expression: \nP")
+  (dolist (buffer (buffer-list))
+    (let ((name (buffer-name buffer)))
+      (when (and name (not (string-equal name ""))
+                 (or internal-too (/= (aref name 0) ?\s))
+                 (string-match regexp name))
+        (delete-window (get-buffer-window buffer))))))
+
+(defun kill-matching-buffers-and-its-windows (regexp &optional internal-too)
+  "Kill buffers whose name matches the specified regexp.
+The optional second argument indicates whether to kill internal buffers too."
+  (interactive "sKill buffers matching this regular expression: \nP")
+  (dolist (buffer (buffer-list))
+    (let ((name (buffer-name buffer)))
+      (when (and name (not (string-equal name ""))
+                 (or internal-too (/= (aref name 0) ?\s))
+                 (string-match regexp name))
+        (kill-buffer-and-its-windows buffer)))))

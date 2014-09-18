@@ -11,31 +11,21 @@
 	(flyspell-mode t)
 	(auto-complete-mode t)
     (setq-default column-number-mode t)
+    (setq ac-quick-help-prefer-pos-tip t)   ;default is t
+    (setq ac-use-quick-help t)
+    (setq ac-quick-help-delay 1.0)
     (setq ac-sources
         '(ac-source-dictionary
           ;; ac-source-semantic
+          ; ac-source-yasnippet
           ac-source-abbrev
           ac-source-words-in-buffer
           ac-source-words-in-same-mode-buffers
           ac-source-files-in-current-dir
           ac-source-filename))
-	;(setq-default asy-command "asy -V -render=4")
+	(setq-default asy-command "asy")
 ))
 (add-hook 'asy-mode-hook 'turn-on-cdlatex)
-
-;(global-linum-mode t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(asy-command "asy"))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 ;; parens auto-complete
 (require 'smartparens-latex)
@@ -50,3 +40,8 @@
 (smartparens-global-mode +1)
 (show-smartparens-global-mode +1)
 (setq show-paren-style 'parenthesis)
+
+(kill-buffer-and-its-windows "*Compile-Log*")
+(kill-buffer-and-its-windows "*scratch*")
+(kill-buffer-and-its-windows "*Messages*")
+(kill-buffer-and-its-windows "*flyspell-region*")

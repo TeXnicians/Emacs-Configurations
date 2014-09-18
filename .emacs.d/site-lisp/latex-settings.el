@@ -14,7 +14,7 @@
 
 (mapc (lambda (mode)
       (add-hook 'LaTeX-mode-hook mode))
-      (list 'auto-fill-mode
+      (list ;'auto-fill-mode
             'LaTeX-math-mode
             'turn-on-reftex
             'linum-mode))
@@ -23,11 +23,13 @@
 (add-hook 'LaTeX-mode-hook
           (lambda ()
             (setq TeX-global-PDF-mode t
-		   TeX-auto-untabify t     ; remove all tabs before saving
+                  TeX-auto-untabify t     ; remove all tabs before saving
                   TeX-engine 'xetex       ; use xelatex default
-                  TeX-show-compilation t) ; display compilation windows
-	    (add-to-list 'TeX-command-list
-             	  '("XeLaTeX" "%'xelatex%(mode)%' %t" TeX-run-TeX nil t))
+                  TeX-show-compilation t  ; display compilation windows
+                  TeX-auto-save t
+                  TeX-parse-self t)
+	    ; (add-to-list 'TeX-command-list
+             	  ; '("XeLaTeX" "%'xelatex%(mode)%' %t" TeX-run-TeX nil t))
 	    ;(setq TeX-command-default "XeLaTeX")
 	    (flyspell-mode 1)
 	    (linum-mode 1)
@@ -45,22 +47,159 @@
 		;folding block elements
 		;C-c C-o C-m
 		;folding inline elements
-	    ;(auto-complete-mode t)
-            (imenu-add-menubar-index)
-            (define-key LaTeX-mode-map (kbd "TAB") 'TeX-complete-symbol)
-	    (define-key LaTeX-mode-map (kbd "C-c C-p") 'reftex-parse-all)
+      (imenu-add-menubar-index)
+            ; (define-key LaTeX-mode-map (kbd "TAB") 'TeX-complete-symbol)
+	    ; (define-key LaTeX-mode-map (kbd "C-c C-p") 'reftex-parse-all)
 	    (define-key LaTeX-mode-map (kbd "C-c C-a") 'TeX-clean)
 ))
 ;; make latexmk available via C-c C-c
 ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
 
-(add-hook 'LaTeX-mode-hook (lambda ()
-  (add-to-list 'TeX-command-list
-    '("latexmk" "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b" TeX-run-TeX nil t
-      :help "Run latexmk on file")
-    )
-  (setq TeX-command-default "latexmk")
-))
+;; autoclose output buffer
+; (defun demolish-tex-help ()
+;   (interactive)
+;   (if (get-buffer "*TeX Help*") ;; Tests if the buffer exists
+;       (progn ;; Do the following commands in sequence
+;         (if (get-buffer-window (get-buffer "*TeX Help*")) ;; Tests if the window exists
+;             (delete-window (get-buffer-window (get-buffer "*TeX Help*")))
+;           ) ;; That should close the window
+;         (kill-buffer "*TeX Help*") ;; This should kill the buffer
+;         )
+;     )
+;   )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; kernel function modification ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; DO NOT TOUCH !!!!!!! ;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun TeX-LaTeX-sentinel-Self (process name)
+  "Cleanup TeX output buffer after running LaTeX."
+  (cond ((TeX-TeX-sentinel-check process name))
+  ((and (save-excursion
+    (or
+     (re-search-forward "^LaTeX Warning: Citation" nil t)
+     (re-search-forward "^Package natbib Warning: Citation" nil t)))
+        (with-current-buffer TeX-command-buffer
+    (and (LaTeX-bibliography-list)
+         (TeX-check-files (TeX-master-file "bbl")
+              (TeX-style-list)
+              (append TeX-file-extensions
+                BibTeX-file-extensions)))))
+   (progn
+    (message (concat "You should run BibTeX to get citations right, "
+        (TeX-current-pages)))
+   (kill-matching-buffers-and-its-windows ".*output" t))
+   (setq TeX-command-next (with-current-buffer TeX-command-buffer
+          TeX-command-BibTeX)))
+  ((or
+    (re-search-forward "^LaTeX Warning: Label(s)" nil t)
+    (re-search-forward "^Package natbib Warning: Citation(s)" nil t))
+   (message (concat "You should run LaTeX again "
+        "to get references right, "
+        (TeX-current-pages)))
+   (setq TeX-command-next TeX-command-default))
+  ((re-search-forward "^LaTeX Warning: Reference" nil t)
+   (message (concat name ": there were unresolved references, "
+        (TeX-current-pages)))
+   (setq TeX-command-next TeX-command-Show))
+  ((or
+    (re-search-forward "^LaTeX Warning: Citation" nil t)
+    (re-search-forward "^Package natbib Warning:.*undefined citations" nil t))
+   (message (concat name ": there were unresolved citations, "
+        (TeX-current-pages)))
+   (setq TeX-command-next TeX-command-Show))
+  ((re-search-forward
+    "^\\(\\*\\* \\)?J?I?p?\\(La\\|Sli\\)TeX\\(2e\\)? \\(Version\\|ver\\.\\|<[0-9/]*>\\)" nil t)
+   (let* ((warnings (and TeX-debug-warnings
+             (TeX-LaTeX-sentinel-has-warnings)))
+    (bad-boxes (and TeX-debug-bad-boxes
+        (TeX-LaTeX-sentinel-has-bad-boxes)))
+    (add-info (when (or warnings bad-boxes)
+          (concat " (with "
+            (when warnings "warnings")
+            (when (and warnings bad-boxes) " and ")
+            (when bad-boxes "bad boxes")
+            ")"))))
+      (progn
+    (kill-matching-buffers-and-its-windows ".*output" t)
+     (message (concat name ": successfully formatted "
+          (TeX-current-pages) add-info)))
+     )
+   (setq TeX-command-next TeX-command-Show))
+  (t
+    (progn
+    (kill-matching-buffers-and-its-windows ".*output" t)
+   (message (concat name ": problems after "
+        (TeX-current-pages)))
+   )
+   (setq TeX-command-next TeX-command-default))))
+
+(setq TeX-sentinel-self-function 'TeX-LaTeX-sentinel-Self)
+
+(defun TeX-run-Self (name command file)
+  "Create a process for NAME using COMMAND to format FILE with TeX."
+  ;; Save information in TeX-error-report-switches
+  ;; Initialize error to nil (no error) for current master.
+  ;; Presence of error is reported inside `TeX-TeX-sentinel-check'
+  (let ((current-master (TeX-master-file)))
+    ;; the current master file is saved because error routines are
+    ;; parsed in other buffers;
+    (setq TeX-error-report-switches
+    (plist-put TeX-error-report-switches
+         'TeX-current-master current-master))
+    ;; reset error to nil (no error)
+    (setq TeX-error-report-switches
+    (plist-put TeX-error-report-switches
+         (intern current-master) nil)))
+
+  ;; can we assume that TeX-sentinel-function will not be changed
+  ;; during (TeX-run-format ..)? --pg
+  ;; rather use let* ? --pg
+
+  (if TeX-interactive-mode
+      (TeX-run-interactive name command file)
+    (let ((sentinel-function TeX-sentinel-self-function))
+      (let ((process (TeX-run-format name command file)))
+  (setq TeX-sentinel-function sentinel-function)
+  (if TeX-process-asynchronous
+      process
+    (TeX-synchronous-sentinel name file process)))))
+  )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; DO NOT TOUCH !!!!!!! ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; kernel function modification ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun run-latexmk ()
+  (interactive)
+  (let ((TeX-save-query nil)
+        ; (TeX-process-asynchronous nil)
+        (master-file (TeX-master-file)))
+    (TeX-save-document "")
+    (TeX-run-Self "latexmk"
+                 (TeX-command-expand "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b" 'TeX-master-file); adjusted
+                 master-file)
+    ; (if (plist-get TeX-error-report-switches (intern master-file))
+    ;     (TeX-next-error t)
+    ;   (progn
+    ; ; (delte-matching-window ".*output" t)
+    ; (minibuffer-message "latexmk: Done!")))
+    ))
+
+(add-hook 'LaTeX-mode-hook
+   (lambda ()
+     (setq TeX-save-query nil)
+     ; (setq TeX-process-asynchronous t)
+     (add-to-list 'TeX-command-list '("latexmk" "(run-latexmk)"
+            TeX-run-function nil t :help "Run latexmk") t)
+     (setq TeX-command-default "latexmk")))
+
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "s-b") #'run-latexmk)))
+
+; (add-hook 'LaTeX-mode-hook (lambda ()
+;   (add-to-list 'TeX-command-list
+;     '("latexmk" "latexmk -pdf -e -f %s && /Applications/Skim.app/Contents/SharedSupport/displayline -r %n %o %b" TeX-run-TeX nil t
+;       :help "Run latexmk on file")
+;     )
+;   (setq TeX-command-default "latexmk")
+; ))
+
 ;(add-hook 'LaTeX-mode-hook (lambda ()
 ;  (push
 ;    '("latexmk" "latexmk -pdf -e -f %s" TeX-run-TeX nil t
@@ -103,12 +242,20 @@
 (setq reftex-label-alist
 	'((nil ?e nil "~\\eqref{%s}" nil nil)
 	  (nil ?f nil "~\\fref{%s}" nil nil)
-	  (nil ?t nil "~\\tref{%s}" nil nil))
+	  (nil ?t nil "~\\tref{%s}" nil nil)
+    ("equation"  ?e "eqn:" "~(\\ref{%s})" t
+       (regexp "equations?" "eqs?\\." "eqn\\." "Gleichung\\(en\\)?"  "Gl\\."))
+      ("eqnarray"  ?e "eqn:" nil eqnarray-like))
 )
 
 (setq reftex-enable-partial-scans t
       reftex-save-parse-info t
-      reftex-use-multiple-selection-buffers t)
+      reftex-use-multiple-selection-buffers t
+      reftex-plug-into-AUCTeX t
+      reftex-auto-recenter-toc t
+      reftex-extra-bindings t
+      reftex-keep-temporary-buffers nil)
+
 
 ;auto-complete
 (require 'auto-complete-settings)

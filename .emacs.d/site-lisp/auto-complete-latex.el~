@@ -115,6 +115,7 @@
 
 (defun ac-l-setup ()
   (setq ac-sources (append ac-l-sources ac-sources))
+  ;(setq ac-sources (append '(ac-source-yasnippet ac-source-gtags) ac-sources))
 )
 
 (defun ac-l-after-init-setup ()

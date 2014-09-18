@@ -7,10 +7,10 @@
 \begin{center}
 \parbox[b]{\textwidth}{\footnotesize\centering
 \subcaptionbox{${1:subcaption1}\label{fig:${2:filename1}}}
-{\includegraphics[width=.45\textwidth]{./figures/$2}}
+{\includegraphics[width=.45\textwidth]{./figures/$2.pdf}}
 \hspace{.1\textwidth}
 \subcaptionbox{${3:subcaption2}\label{fig:${4:filename1}}}
-{\includegraphics[width=.45\textwidth]{./figures/$4}}
+{\includegraphics[width=.45\textwidth]{./figures/$4.pdf}}
 \caption{${5:caption}}
 \label{fig:${6:label}}
 }

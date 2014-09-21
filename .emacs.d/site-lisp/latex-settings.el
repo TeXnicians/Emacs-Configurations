@@ -1,7 +1,7 @@
 
 ;spell check
 (setq ispell-program-name "aspell")
-;(setq ispell-list-command "--list")
+; (setq ispell-list-command "--list")
 (setq ispell-extra-args '("--sug-mode=ultra"))
 (setq ispell-dictionary "english")
 
@@ -15,7 +15,7 @@
 (mapc (lambda (mode)
       (add-hook 'LaTeX-mode-hook mode))
       (list ;'auto-fill-mode
-            'LaTeX-math-mode
+            ; 'LaTeX-math-mode
             'turn-on-reftex
             'linum-mode))
 (setq TeX-PDF-mode t)
@@ -51,22 +51,12 @@
             ; (define-key LaTeX-mode-map (kbd "TAB") 'TeX-complete-symbol)
 	    ; (define-key LaTeX-mode-map (kbd "C-c C-p") 'reftex-parse-all)
 	    (define-key LaTeX-mode-map (kbd "C-c C-a") 'TeX-clean)
+      (define-key LaTeX-mode-map (kbd "s-/") 'TeX-comment-or-uncomment-region)
 ))
 ;; make latexmk available via C-c C-c
 ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
 
-;; autoclose output buffer
-; (defun demolish-tex-help ()
-;   (interactive)
-;   (if (get-buffer "*TeX Help*") ;; Tests if the buffer exists
-;       (progn ;; Do the following commands in sequence
-;         (if (get-buffer-window (get-buffer "*TeX Help*")) ;; Tests if the window exists
-;             (delete-window (get-buffer-window (get-buffer "*TeX Help*")))
-;           ) ;; That should close the window
-;         (kill-buffer "*TeX Help*") ;; This should kill the buffer
-;         )
-;     )
-;   )
+(setq-default TeX-newline-function 'newline-and-indent)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; kernel function modification ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; DO NOT TOUCH !!!!!!! ;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun TeX-LaTeX-sentinel-Self (process name)
@@ -91,9 +81,10 @@
   ((or
     (re-search-forward "^LaTeX Warning: Label(s)" nil t)
     (re-search-forward "^Package natbib Warning: Citation(s)" nil t))
-   (message (concat "You should run LaTeX again "
-        "to get references right, "
+   (progn
+    (message (concat "You should run BibTeX to get citations right, "
         (TeX-current-pages)))
+   (kill-matching-buffers-and-its-windows ".*output" t))
    (setq TeX-command-next TeX-command-default))
   ((re-search-forward "^LaTeX Warning: Reference" nil t)
    (message (concat name ": there were unresolved references, "
@@ -305,6 +296,18 @@
   ("aligned" "Insert aligned env" "" cdlatex-environment ("aligned") t t)
   ("dfr"         "Insert \\dfrac{}{}"
      "\\dfrac{?}{}"           cdlatex-position-cursor nil nil t)
+  ("ld"         "Insert \\ldots"
+     "\\ldots?"           cdlatex-position-cursor nil nil t)
+  ("cd"         "Insert \\cdots"
+     "\cdots?"           cdlatex-position-cursor nil nil t)
+  ("vd"         "Insert \\vdots"
+     "\\vdots?"           cdlatex-position-cursor nil nil t)
+  ("dd"         "Insert \\ddots"
+     "\\ddots?"           cdlatex-position-cursor nil nil t)
+  ("g"         "Insert \\ge"
+     "\\ge?"           cdlatex-position-cursor nil nil t)
+  ("l"         "Insert \\le"
+     "\\le?"           cdlatex-position-cursor nil nil t)
  )
 )  ;; define alias of environment, type alias [TAB] to get the structure of environment
 

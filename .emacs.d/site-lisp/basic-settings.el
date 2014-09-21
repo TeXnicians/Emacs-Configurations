@@ -37,7 +37,7 @@
 
 ;keys
 (setq ns-function-modifier 'hyper) ; set Mac's Fn key to type Hyper
-; (setq mac-command-modifier 'control) ; set Mac's Cmd key to type Contrl
+; (setq mac-command-modifier 'meta) ; set Mac's Cmd key to type Contrl
 (setq mac-right-command-modifier 'super) ; set Mac's Cmd key to type Super
 
 ;fonts
@@ -135,9 +135,45 @@
 ;(set-keyboard-coding-system 'chinese-iso-8bit)
 
 ;smart tab
-(setq-default TeX-newline-function 'newline-and-indent)
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
+;; Set default tab space for various modes
+; (setq-default sgml-basic-offset 4)
+; (setq-default py-indent-offset 4)
+; (setq-default python-indent 4)
+
+; ;; highlight tabs and trailing whitespace
+; (require 'highlight-chars)
+; (add-hook 'font-lock-mode-hook 'hc-highlight-tabs)
+; (add-hook 'font-lock-mode-hook 'hc-highlight-trailing-whitespace)
+
+;; Shift the selected region right if distance is postive, left if
+;; negative
+
+(defun shift-region (distance)
+  (let ((mark (mark)))
+    (save-excursion
+      (indent-rigidly (region-beginning) (region-end) distance)
+      (push-mark mark t t)
+      ;; Tell the command loop not to deactivate the mark
+      ;; for transient mark mode
+      (setq deactivate-mark nil))))
+
+(defun shift-right ()
+  (interactive)
+  (shift-region 4))
+
+(defun shift-left ()
+  (interactive)
+  (shift-region -4))
+
+;; Bind (shift-right) and (shift-left) function to your favorite keys. I use
+;; the following so that Ctrl-Shift-Right Arrow moves selected text one
+;; column to the right, Ctrl-Shift-Left Arrow moves selected text one
+;; column to the left:
+
+(global-set-key (kbd "s-]") 'shift-right)
+(global-set-key (kbd "s-[") 'shift-left)
 
 ;highlight parens
 ; (show-paren-mode 1)
@@ -152,30 +188,6 @@
 ;; If you want to configure a keybinding (e.g., C-c z), add the following
 (global-set-key (kbd "<f10>") 'reveal-in-finder)
 
-;; copy line
-(defun copy-line (arg)
-    "Copy lines (as many as prefix argument) in the kill ring.
-      Ease of use features:
-      - Move to start of next line.
-      - Appends the copy on sequential calls.
-      - Use newline as last char even on the last line of the buffer.
-      - If region is active, copy its lines."
-    (interactive "p")
-    (let ((beg (line-beginning-position))
-          (end (line-end-position arg)))
-      (when mark-active
-        (if (> (point) (mark))
-            (setq beg (save-excursion (goto-char (mark)) (line-beginning-position)))
-          (setq end (save-excursion (goto-char (mark)) (line-end-position)))))
-      (if (eq last-command 'copy-line)
-          (kill-append (buffer-substring beg end) (< end beg))
-        (kill-ring-save beg end)))
-    (kill-append "\n" nil)
-    (beginning-of-line (or (and arg (1+ arg)) 2))
-    (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
-
-;; optional key binding
-(global-set-key (kbd "C-s-l") 'copy-line)
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/smartparens")
 
@@ -191,6 +203,43 @@
 
 (global-set-key [wheel-up] 'safe-scroll-down)
 (global-set-key [wheel-down] 'safe-scroll-up)
+
+;;;;;;;;;;;;;;;;;;;;;; disable built-in keybindings ;;;;;;;;;;;;;;;;;;;;
+
+(define-key global-map [?\s-p] nil) ; ns-print-buffer
+(define-key global-map [?\s-l] nil) ; goto-line
+(define-key global-map (kbd "s-l") 'goto-line) ; goto-line
+(define-key global-map [?\s-D] nil) ; dired
+(define-key global-map [?\s-L] nil) ; shell-command
+(define-key global-map [?\s-f] nil) ; isearch-forward
+(define-key global-map (kbd "s-f") 'isearch-forward) ; isearch-forward
+(define-key global-map (kbd "s-F") 'query-replace) ; isearch-forward
+(define-key global-map [?\s-k] nil) ; kill-this-buffer
+(define-key global-map [?\s-w] nil) ; delete-frame
+(define-key global-map (kbd "s-w") 'kill-this-buffer) ;
+(require 'cl)
+(require 'recentf)
+
+; (defun undo-kill-buffer (arg)
+;   "Re-open the last buffer killed.  With ARG, re-open the nth buffer."
+;   (interactive "p")
+;   (let ((recently-killed-list (copy-sequence recentf-list))
+;    (buffer-files-list
+;     (delq nil (mapcar (lambda (buf)
+;             (when (buffer-file-name buf)
+;         (expand-file-name (buffer-file-name buf)))) (buffer-list)))))
+;     (mapc
+;      (lambda (buf-file)
+;        (setq recently-killed-list
+;        (delq buf-file recently-killed-list)))
+;      buffer-files-list)
+;     (find-file
+;      (if arg (nth arg recently-killed-list)
+;        (car recently-killed-list)))))
+
+(define-key global-map (kbd "s-W") 'kill-buffer-and-window) ;
+
+;;;;;;;;;;;;;;;;;;;;;; disable built-in keybindings ;;;;;;;;;;;;;;;;;;;;
 
 ;; helm for launch buffer
 (add-to-list 'load-path "/Users/Zhaodong/.emacs.d/site-lisp/helm")
@@ -228,9 +277,9 @@
 (helm-mode 1)
 
 ;; helm mini
-(define-key global-map [?\s-p] nil)
 (global-set-key (kbd "s-p") 'helm-mini)
 (global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "<M-s-f>") 'helm-find-files)
 
 ; go to matched paren
 (defun goto-match-paren-dollar (arg)
@@ -290,7 +339,89 @@
 (global-set-key (kbd "<s-up>") 'beginning-of-buffer)
 (global-set-key (kbd "<s-down>") 'end-of-buffer)
 ;; kill whole line
+(defun avi-kill-line-save (&optional arg)
+      "Copy to the kill ring from point to the end of the current line.
+    With a prefix argument, copy that many lines from point. Negative
+    arguments copy lines backward. With zero argument, copies the
+    text before point to the beginning of the current line."
+      (interactive "p")
+      (save-excursion
+        (copy-region-as-kill
+         (point)
+         (progn (if arg (forward-visible-line arg)
+                  (end-of-visible-line))
+                (point)))))
+
 (global-set-key (kbd "<s-backspace>") 'kill-whole-line)
+(global-set-key (kbd "s-k") 'kill-line) ;
+(defun backward-kill-line (arg)
+  "Kill ARG lines backward."
+  (interactive "p")
+  (kill-line (- 1 arg)))
+(global-set-key (kbd "s-K") 'backward-kill-line)
+
+;; duplicate current line
+    (defun duplicate-current-line (&optional n)
+      "duplicate current line, make more than 1 copy given a numeric argument"
+      (interactive "p")
+      (save-excursion
+        (let ((nb (or n 1))
+        (current-line (thing-at-point 'line)))
+          ;; when on last line, insert a newline first
+          (when (or (= 1 (forward-line 1)) (eq (point) (point-max)))
+      (insert "\n"))
+
+          ;; now insert as many time as requested
+          (while (> n 0)
+      (insert current-line)
+      (decf n)))))
+
+    (defun duplicate-current-line-or-region (arg)
+  "Duplicates the current line or region ARG times.
+If there's no region, the current line will be duplicated. However, if
+there's a region, all lines that region covers will be duplicated."
+  (interactive "p")
+  (let (beg end (origin (point)))
+    (if (and mark-active (> (point) (mark)))
+        (exchange-point-and-mark))
+    (setq beg (line-beginning-position))
+    (if mark-active
+        (exchange-point-and-mark))
+    (setq end (line-end-position))
+    (let ((region (buffer-substring-no-properties beg end)))
+      (dotimes (i arg)
+        (goto-char end)
+        (newline)
+        (insert region)
+        (setq end (point)))
+      (goto-char (+ origin (* (length region) arg) arg)))))
+
+(global-set-key (kbd "s-D") 'duplicate-current-line-or-region); cmd-shift-d
+
+(defun quick-copy-line ()
+      "Copy the whole line that point is on and move to the beginning of the next line.
+    Consecutive calls to this command append each line to the
+    kill-ring."
+      (interactive)
+      (let ((beg (line-beginning-position 1))
+            (end (line-beginning-position 2)))
+        (if (eq last-command 'quick-copy-line)
+            (kill-append (buffer-substring beg end) (< end beg))
+          (kill-new (buffer-substring beg end))))
+      (beginning-of-line 2))
+
+(global-set-key (kbd "s-L") 'quick-copy-line); cmd-shift-l
+(global-set-key (kbd "<s-right>") 'end-of-line); cmd-right
+(global-set-key (kbd "<s-left>") 'beginning-of-line); cmd-left
+; (global-set-key (kbd "ESC") 'keyboard-quit)
+
+;; set mark
+(global-set-key (kbd "s-2") 'mark-word)
+; (global-set-key (kbd "s-b") 'backward-word)
+; (global-set-key (kbd "s-f") 'forward-word)
+; (global-set-key (kbd "s-l") 'downcase-word)
+; (global-set-key (kbd "s-c") 'capitalize-word)
+; (global-set-key (kbd "s-u") 'upcase-word)
 ;; replace all key bindings for ‘kill-buffer’ with bindings to ‘kill-buffer-and-its-windows’
 (require 'misc-cmds)
 (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)

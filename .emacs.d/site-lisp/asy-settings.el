@@ -1,10 +1,9 @@
 ;asymptote
 (add-to-list 'load-path "/usr/local/share/asymptote")
 (require 'asy-mode)
-;(setq ac-modes (append ac-modes '(asy-mode)))
-;(add-hook 'asy-mode-hook 'ac-l-setup)
-;(add-hook 'asy-mode-hook 'flyspell-mode)
-;(add-hook 'asy-mode-hook 'flyspell-buffer)
+(add-hook 'asy-mode-hook 'flyspell-mode)
+(add-hook 'asy-mode-hook 'flyspell-buffer)
+(add-hook 'asy-mode-hook 'turn-on-cdlatex)
 (add-hook 'asy-mode-hook
     (lambda ()
 	(linum-mode t)
@@ -23,12 +22,18 @@
           ac-source-words-in-same-mode-buffers
           ac-source-files-in-current-dir
           ac-source-filename))
-	(setq-default asy-command "asy")
+	(setq-default asy-command "asy -noprc -render=4")
+	(define-key asy-mode-map (kbd "s-b") 'asy-compile)
+	(define-key asy-mode-map  "^" nil)
+	(define-key asy-mode-map  "_" nil)
 ))
-(add-hook 'asy-mode-hook 'turn-on-cdlatex)
 
 ;; parens auto-complete
 (require 'smartparens-latex)
+(sp-local-pair 'latex-mode "\|" "\|")
+(sp-local-pair 'latex-mode "\\|" "\\|")
+(sp-local-pair 'latex-mode "'" "'")
+(sp-pair "`" nil :actions :rem)
 ; ; (package-initialize)
 ; (defun prelude-latex-mode-defaults ()
 ;    (turn-on-auto-fill)
@@ -42,6 +47,6 @@
 (setq show-paren-style 'parenthesis)
 
 (kill-buffer-and-its-windows "*Compile-Log*")
-(kill-buffer-and-its-windows "*scratch*")
-(kill-buffer-and-its-windows "*Messages*")
-(kill-buffer-and-its-windows "*flyspell-region*")
+
+(setq recentf-auto-cleanup 'never)
+(recentf-mode 1)

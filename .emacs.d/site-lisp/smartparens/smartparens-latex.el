@@ -54,9 +54,9 @@
 (require 'smartparens)
 
 (defun sp-latex-insert-spaces-inside-pair (id action context)
-a  (when (eq action 'insert)
-    (insert "  ")
-    (backward-char 1)))
+  (when (eq action 'insert)
+    (insert "   ")
+    (backward-char 2)))
 
 (defun sp-latex-skip-match-apostrophe (ms mb me)
   (when (equal ms "'")

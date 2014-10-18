@@ -30,10 +30,12 @@
 
 ;; parens auto-complete
 (require 'smartparens-latex)
-(sp-local-pair 'latex-mode "\|" "\|")
+; (sp-local-pair 'latex-mode "\|" "\|")
 (sp-local-pair 'latex-mode "\\|" "\\|")
 (sp-local-pair 'latex-mode "'" "'")
 (sp-pair "`" nil :actions :rem)
+(sp-pair "'" nil :actions :rem)
+(sp-local-pair 'asy-mode "``" nil :actions :rem)
 ; ; (package-initialize)
 ; (defun prelude-latex-mode-defaults ()
 ;    (turn-on-auto-fill)

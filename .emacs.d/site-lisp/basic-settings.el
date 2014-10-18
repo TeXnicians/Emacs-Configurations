@@ -238,6 +238,14 @@
 ;        (car recently-killed-list)))))
 
 (define-key global-map (kbd "s-W") 'kill-buffer-and-window) ;
+(define-key global-map [?\s-z] nil)
+;; undo tree
+(require 'undo-tree)
+(global-undo-tree-mode 1)
+(defalias 'redo 'undo-tree-redo)
+(global-set-key (kbd "s-z") 'undo) ; cmd+z
+
+(global-set-key (kbd "s-Z") 'redo) ; cmd+Shift+z  Mac style
 
 ;;;;;;;;;;;;;;;;;;;;;; disable built-in keybindings ;;;;;;;;;;;;;;;;;;;;
 
@@ -352,13 +360,26 @@
                   (end-of-visible-line))
                 (point)))))
 
-(global-set-key (kbd "<s-backspace>") 'kill-whole-line)
-(global-set-key (kbd "s-k") 'kill-line) ;
-(defun backward-kill-line (arg)
+(defun delete-whole-line (&optional arg)
+  (interactive "p")
+  (delete-region (progn (forward-line 0) (point))
+                 (progn (forward-line 1) (point))))
+(defun delete-line (&optional arg)
+  (interactive "p")
+  (delete-region (point) (progn (forward-line 1)
+                                (forward-char -1)
+                                (point))))
+(defun backward-delete-line (arg)
   "Kill ARG lines backward."
   (interactive "p")
-  (kill-line (- 1 arg)))
-(global-set-key (kbd "s-K") 'backward-kill-line)
+  (delete-region (line-beginning-position) (point)))
+; (defun backward-kill-line (arg)
+;   "Kill ARG lines backward."
+;   (interactive "p")
+;   (kill-line (- 1 arg)))
+(global-set-key (kbd "s-k") 'delete-line) ;
+(global-set-key (kbd "<s-backspace>") 'delete-whole-line)
+(global-set-key (kbd "s-K") 'backward-delete-line)
 
 ;; duplicate current line
     (defun duplicate-current-line (&optional n)
@@ -425,6 +446,18 @@ there's a region, all lines that region covers will be duplicated."
 ;; replace all key bindings for ‘kill-buffer’ with bindings to ‘kill-buffer-and-its-windows’
 (require 'misc-cmds)
 (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
+(global-set-key
+  (kbd "s-r")
+  (lambda (&optional force-reverting)
+    "Interactive call to revert-buffer. Ignoring the auto-save
+ file and not requesting for confirmation. When the current buffer
+ is modified, the command refuses to revert it, unless you specify
+ the optional argument: force-reverting to true."
+    (interactive "P")
+    ;;(message "force-reverting value is %s" force-reverting)
+    (if (or force-reverting (not (buffer-modified-p)))
+        (revert-buffer :ignore-auto :noconfirm)
+      (error "The buffer has been modified"))))
 
 ;; redefine kill-matching-buffers
 (defun delte-matching-window (regexp &optional internal-too)
@@ -448,3 +481,5 @@ The optional second argument indicates whether to kill internal buffers too."
                  (or internal-too (/= (aref name 0) ?\s))
                  (string-match regexp name))
         (kill-buffer-and-its-windows buffer)))))
+
+

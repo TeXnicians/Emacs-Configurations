@@ -26,7 +26,7 @@
                   TeX-auto-untabify t     ; remove all tabs before saving
                   TeX-engine 'xetex       ; use xelatex default
                   TeX-show-compilation t  ; display compilation windows
-                  TeX-auto-save t
+                  ; TeX-auto-save t
                   TeX-parse-self t)
 	    ; (add-to-list 'TeX-command-list
              	  ; '("XeLaTeX" "%'xelatex%(mode)%' %t" TeX-run-TeX nil t))
@@ -296,6 +296,12 @@
   ("aligned" "Insert aligned env" "" cdlatex-environment ("aligned") t t)
   ("dfr"         "Insert \\dfrac{}{}"
      "\\dfrac{?}{}"           cdlatex-position-cursor nil nil t)
+  ("sm"       "Insert \\sum_{}^{}"
+     "\\sum_{?}^{}"  cdlatex-position-cursor nil nil t)
+  ("pd"       "Insert \\prod_{}^{}"
+     "\\prod_{?}^{}"  cdlatex-position-cursor nil nil t)
+  ("int"       "Insert \\int_{}^{}"
+     "\\int_{?}^{}"  cdlatex-position-cursor nil nil t)
   ("ld"         "Insert \\ldots"
      "\\ldots?"           cdlatex-position-cursor nil nil t)
   ("cd"         "Insert \\cdots"
@@ -304,16 +310,27 @@
      "\\vdots?"           cdlatex-position-cursor nil nil t)
   ("dd"         "Insert \\ddots"
      "\\ddots?"           cdlatex-position-cursor nil nil t)
-  ("g"         "Insert \\ge"
-     "\\ge?"           cdlatex-position-cursor nil nil t)
-  ("l"         "Insert \\le"
-     "\\le?"           cdlatex-position-cursor nil nil t)
  )
 )  ;; define alias of environment, type alias [TAB] to get the structure of environment
 
 (setq cdlatex-math-modify-alist
  '(( ?l	  "\\mathbb"   "\\textsl"	t 	nil 	nil)
    ( ?c	  "\\mathcal"   "\\textsc"	t 	nil 	nil)
+   ( ?t    "\\text"     "\\texttt"  t   nil  nil)
+  )
+)
+
+(setq cdlatex-math-symbol-alist
+ '(( ?j  ("\\theta"          "\\vartheta"))
+   ( ?F  ("\\Phi"            ))
+   ( ?1  ("\\partial"        ))
+   ( ?<  ("\\le"      "\\leftarrow"     "\\longleftarrow"))
+   ( ?>  ("\\ge"      "\\rightarrow"    "\\longrightarrow"))
+   ( ?m  ("\\mu"      "\\min"           "\\max"))
+   ( ?l  ("\\lambda"         "\\log"           "\\ell"))
+   ( ?n  ("\\nu"             "\\ln"))
+   ( ?N  ("\\nabla"          "\\exp"))
+   ( ?!  ("\\neq"            ))
   )
 )
 

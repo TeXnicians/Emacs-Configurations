@@ -360,6 +360,25 @@
                   (end-of-visible-line))
                 (point)))))
 
+(defun forward-delete-word (&optional arg)
+  "Delete characters forward until encountering the end of a word.
+With argument, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (forward-word arg) (point))))
+
+(defun backward-delete-word (&optional arg)
+  "Delete characters forward until encountering the end of a word.
+With argument, do this that many times."
+  (interactive "p")
+  (forward-delete-word (- arg)))
+
+(defun delete-word (&optional arg)
+"Delete characters backward until encountering the end of a word.
+With argument, do this that many times."
+  (interactive "p")
+  (forward-delete-word)
+  (forward-delete-word (- arg)))
+
 (defun delete-whole-line (&optional arg)
   (interactive "p")
   (delete-region (progn (forward-line 0) (point))
@@ -380,6 +399,9 @@
 (global-set-key (kbd "s-k") 'delete-line) ;
 (global-set-key (kbd "<s-backspace>") 'delete-whole-line)
 (global-set-key (kbd "s-K") 'backward-delete-line)
+(global-set-key (kbd "s-g") 'forward-delete-word)
+(global-set-key (kbd "s-G") 'backward-delete-word)
+(global-set-key (kbd "s-d") 'delete-word)
 
 ;; duplicate current line
     (defun duplicate-current-line (&optional n)

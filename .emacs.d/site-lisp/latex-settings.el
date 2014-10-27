@@ -323,6 +323,7 @@
 (setq cdlatex-math-symbol-alist
  '(( ?j  ("\\theta"          "\\vartheta"))
    ( ?F  ("\\Phi"            ))
+   ( ?J  ("\\Theta"            ))
    ( ?1  ("\\partial"        ))
    ( ?<  ("\\le"      "\\leftarrow"     "\\longleftarrow"))
    ( ?>  ("\\ge"      "\\rightarrow"    "\\longrightarrow"))
